@@ -27,14 +27,3 @@ path = "src"
 
 [project.optional-dependencies]
 dev = ["pytest"]
-
-[tool.flet.splash]
-color = "#FFFF00" # --splash-color
-dark_color = "#8B8000" # --splash-dark-color
-web = false # --no-web-splash
-ios = false # --no-ios-splash
-android = false # --no-android-splash
-
-[tool.flet.app.boot_screen]
-show = true
-message = "Preparing the app for its first launch…"

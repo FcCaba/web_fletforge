@@ -12,6 +12,12 @@ os.environ["PYTHONASYNCIODEBUG"] = "0"
 
 def main(page: ft.Page):
     print(f"Iniciando proyecto FletForge ({Settings.PLATFORM})")
+
+    # Advertencia si no se usa el runner oficial
+    if not os.environ.get("FLET_FORGE_RUN"):
+        print("⚠️  ADVERTENCIA: Ejecutando sin 'fletforge run'.")
+        print("    La configuración de puertos y vistas en settings.py será IGNORADA por el CLI de Flet.")
+        print("    Usa 'fletforge run' para aplicar tu configuración automáticamente.")
     
     try:
         # 1. Configuración de página
