@@ -13,8 +13,9 @@ os.environ["PYTHONASYNCIODEBUG"] = "0"
 def main(page: ft.Page):
     print(f"Iniciando proyecto FletForge ({Settings.PLATFORM})")
 
-    # Advertencia si no se usa el runner oficial
-    if not os.environ.get("FLET_FORGE_RUN"):
+    # Advertencia si no se usa el runner oficial (Saltar en Producción/Render)
+    # Si existe la variable RENDER (o PORT), asumimos entorno cloud y no molestamos.
+    if not os.environ.get("FLET_FORGE_RUN") and not os.environ.get("RENDER") and not os.environ.get("PORT"):
         print("⚠️  ADVERTENCIA: Ejecutando sin 'fletforge run'.")
         print("    La configuración de puertos y vistas en settings.py será IGNORADA por el CLI de Flet.")
         print("    Usa 'fletforge run' para aplicar tu configuración automáticamente.")
@@ -69,6 +70,7 @@ if __name__ == "__main__":
     
     if Settings.PLATFORM == "web":
         run_args["port"] = Settings.WEB_PORT
+        run_args["host"] = "0.0.0.0" # Escuchar en todas las interfaces (Docker/Render)
         run_args["web_renderer"] = Settings.WEB_RENDERER
         run_args["route_url_strategy"] = Settings.ROUTE_URL_STRATEGY
 

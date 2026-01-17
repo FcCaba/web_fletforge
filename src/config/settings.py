@@ -1,4 +1,5 @@
 import flet as ft
+import os
 from .theme import ThemeColors, get_app_theme, get_alternative_theme
 
 class Settings:
@@ -12,19 +13,22 @@ class Settings:
     }
     
     # Configuración de Plataforma: "desktop", "web", "mobile"
-    PLATFORM = "web" 
+    # Render inyecta la variable PLATFORM (si la configuras) o usa el default
+    PLATFORM = os.environ.get("PLATFORM", "web")
     
     # Dimensiones fijas para móvil
     MOBILE_WIDTH = 390
     MOBILE_HEIGHT = 844
 
     # Configuración de Navegación
-    WEB_PORT = 8550
+    # Render inyecta la variable PORT automáticamente
+    WEB_PORT = int(os.environ.get("PORT", 8550))
     ROUTE_URL_STRATEGY = "path"
 
     # Mapeo de Colores para compatibilidad con Layouts
     COLOR_PRIMARY = ThemeColors.PRIMARY
     COLOR_ON_PRIMARY = ThemeColors.ON_PRIMARY
+    
     COLOR_SECONDARY = ThemeColors.SECONDARY
     COLOR_SURFACE = ThemeColors.SURFACE
     COLOR_BACKGROUND = ThemeColors.BACKGROUND
