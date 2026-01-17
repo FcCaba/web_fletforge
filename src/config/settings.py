@@ -6,7 +6,7 @@ class Settings:
     APP_TITLE = "FletForge App"
     DEFAULT_LANGUAGE = "es"
     THEME_MODE = "light" # "light", "dark", "system"
-    THEME_SELECTION = "alternative" # "default" o "alternative"
+    THEME_SELECTION = "default" # "default" o "alternative"
     DEFAULT_FONT_FAMILY = "MainFont"
     FONTS = {
         "MainFont": "fonts/BebasNeue-Regular.ttf",

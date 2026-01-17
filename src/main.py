@@ -11,20 +11,26 @@ warnings.filterwarnings("ignore", category=RuntimeWarning)
 os.environ["PYTHONASYNCIODEBUG"] = "0"
 
 def main(page: ft.Page):
-    print(f"Iniciando proyecto FletForge ({Settings.PLATFORM})")
-
-    # Advertencia si no se usa el runner oficial (Saltar en Producción/Render)
-    # Si existe la variable RENDER (o PORT), asumimos entorno cloud y no molestamos.
-    if not os.environ.get("FLET_FORGE_RUN") and not os.environ.get("RENDER") and not os.environ.get("PORT"):
-        print("⚠️  ADVERTENCIA: Ejecutando sin 'fletforge run'.")
-        print("    La configuración de puertos y vistas en settings.py será IGNORADA por el CLI de Flet.")
-        print("    Usa 'fletforge run' para aplicar tu configuración automáticamente.")
+    # --- DIAGNOSTIC START ---
+    page.title = "Debug Mode"
+    log_col = ft.Column(scroll=True)
+    page.add(log_col)
     
+    def log(msg):
+        print(msg)
+        log_col.controls.append(ft.Text(f"LOG: {msg}", color="green", font_family="monospace"))
+        page.update()
+
+    log(f"Iniciando... Plataforma: {page.platform}")
+    log(f"Ruta original: '{page.route}'")
+
     try:
         # 1. Configuración de página
+        log("1. Configurando Page...")
         Settings.configure_page(page)
         
         # 2. Persistencia y Configuración Dinámica
+        log("2. Cargando Servicios...")
         from services.persistence_service import PersistenceService
         from i18n.manager import i18n
         
@@ -38,7 +44,15 @@ def main(page: ft.Page):
         saved_lang = storage.get("language", Settings.DEFAULT_LANGUAGE)
         i18n.language = saved_lang
         
-        # 3. Selección de Router modular
+        # 3. Selección de Router modular (Runtime Detection para APK/EXE)
+        log("3. Configurando Plataforma...")
+        if page.platform in [ft.PagePlatform.ANDROID, ft.PagePlatform.IOS]:
+            Settings.PLATFORM = "mobile"
+        elif page.platform in [ft.PagePlatform.WINDOWS, ft.PagePlatform.MACOS, ft.PagePlatform.LINUX]:
+            Settings.PLATFORM = "desktop"
+        
+        log(f"Plataforma final: {Settings.PLATFORM}")
+            
         if Settings.PLATFORM == "mobile":
             from core.router_mobile import MobileRouter as AppRouter
         elif Settings.PLATFORM == "web":
@@ -52,11 +66,27 @@ def main(page: ft.Page):
         page.on_back_button = AppRouter.on_view_pop
         
         # 4. Carga inicial sincronizada usando la ruta actual
+        log("4. Cargando Rutas...")
+        
+        # Limpiamos el log para mostrar la app real... 
+        # COMENTADO PARA DEBUG: Si limpiamos y falla despues, no vemos el log.
+        # page.clean() 
+        
         AppRouter.route_change(page)
+        log("✅ Router cargado.")
         
     except Exception as e:
-        print(f"Error fatal: {e}")
-        page.add(ft.Text(f"Error fatal: {e}", color="red"))
+        import traceback
+        error_trace = traceback.format_exc()
+        log("❌ ERROR FATAL")
+        
+        # Asegurar que se vea el error
+        page.add(
+            ft.Container(
+                content=ft.Text(error_trace, color="red", size=14, font_family="monospace"),
+                bgcolor="#111111", padding=10
+            ) 
+        )
         page.update()
 
 if __name__ == "__main__":
