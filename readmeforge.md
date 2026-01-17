@@ -26,6 +26,21 @@ Ahora puedes cambiar el look de toda tu aplicación desde un solo lugar:
 
 ---
 
+## ☁️ Despliegue (Deployment)
+
+### Render / Railway / Docker
+Este proyecto es "Cloud Native". Para desplegarlo en producción:
+
+1.  **Build Command**: `pip install -r requirements.txt`
+2.  **Start Command**: `python src/main.py`
+3.  **Variables de Entorno**:
+    *   `PLATFORM`: `web`
+    *   `PYTHON_VERSION`: `3.11.0` (Recomendado)
+
+> **Nota**: No necesitas usar `fletforge run` en producción. El archivo `src/main.py` detectará automáticamente el puerto y la configuración de red.
+
+---
+
 ## 🛠️ Comandos de la CLI de FletForge
 
 ### 1. Creación de Componentes

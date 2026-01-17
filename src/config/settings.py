@@ -6,7 +6,7 @@ class Settings:
     APP_TITLE = "FletForge App"
     DEFAULT_LANGUAGE = "es"
     THEME_MODE = "light" # "light", "dark", "system"
-    THEME_SELECTION = "default" # "default" o "alternative"
+    THEME_SELECTION = "alternative" # "default" o "alternative"
     DEFAULT_FONT_FAMILY = "MainFont"
     FONTS = {
         "MainFont": "fonts/BebasNeue-Regular.ttf",
@@ -28,7 +28,6 @@ class Settings:
     # Mapeo de Colores para compatibilidad con Layouts
     COLOR_PRIMARY = ThemeColors.PRIMARY
     COLOR_ON_PRIMARY = ThemeColors.ON_PRIMARY
-    
     COLOR_SECONDARY = ThemeColors.SECONDARY
     COLOR_SURFACE = ThemeColors.SURFACE
     COLOR_BACKGROUND = ThemeColors.BACKGROUND

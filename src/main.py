@@ -70,9 +70,18 @@ if __name__ == "__main__":
     
     if Settings.PLATFORM == "web":
         run_args["port"] = Settings.WEB_PORT
-        run_args["host"] = "0.0.0.0" # Escuchar en todas las interfaces (Docker/Render)
         run_args["web_renderer"] = Settings.WEB_RENDERER
         run_args["route_url_strategy"] = Settings.ROUTE_URL_STRATEGY
+        
+        # Configuración de Host Inteligente
+        # En Render/Docker necesitamos 0.0.0.0 para que sea accesible desde fuera.
+        # En Local (Windows) usamos 127.0.0.1 para que el navegador lo abra sin errores.
+        if os.environ.get("RENDER"):
+            run_args["host"] = "0.0.0.0"
+            print(f"🌍 Modo Cloud Detectado: Escuchando en 0.0.0.0:{Settings.WEB_PORT}")
+        else:
+            # En local dejamos que Flet decida (normalmente 127.0.0.1) o forzamos localhost
+            pass 
 
     try:
         ft.run(**run_args)
