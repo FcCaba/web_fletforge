@@ -10,7 +10,7 @@ warnings.filterwarnings("ignore", category=RuntimeWarning)
 # Evitar ruidos de asyncio en Windows al cerrar la app
 os.environ["PYTHONASYNCIODEBUG"] = "0"
 
-def main(page: ft.Page):
+async def main(page: ft.Page):
     # --- DIAGNOSTIC START ---
     page.title = "Debug Mode"
     log_col = ft.Column(scroll=True)
@@ -37,11 +37,11 @@ def main(page: ft.Page):
         storage = PersistenceService(page)
         
         # Cargar Tema
-        saved_theme = storage.get("theme_mode", Settings.THEME_MODE)
+        saved_theme = await storage.get("theme_mode", Settings.THEME_MODE)
         page.theme_mode = ft.ThemeMode.DARK if saved_theme == "dark" else ft.ThemeMode.LIGHT
         
         # Cargar Idioma
-        saved_lang = storage.get("language", Settings.DEFAULT_LANGUAGE)
+        saved_lang = await storage.get("language", Settings.DEFAULT_LANGUAGE)
         i18n.language = saved_lang
         
         # 3. Selección de Router modular (Runtime Detection para APK/EXE)

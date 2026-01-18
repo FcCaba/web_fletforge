@@ -39,11 +39,11 @@ class AppBarComponent(ft.AppBar):
                     items=[
                         ft.PopupMenuItem(
                             content=ft.Text("Español"),
-                            on_click=lambda _: self._change_language("es")
+                            on_click=self._create_change_language_handler("es")
                         ),
                         ft.PopupMenuItem(
                             content=ft.Text("English"),
-                            on_click=lambda _: self._change_language("en")
+                            on_click=self._create_change_language_handler("en")
                         ),
                     ]
                 ),
@@ -51,7 +51,7 @@ class AppBarComponent(ft.AppBar):
             ]
         )
 
-    def _toggle_theme(self, e):
+    async def _toggle_theme(self, e):
         """Cambia el tema y guarda la preferencia."""
         from services.persistence_service import PersistenceService
         
@@ -63,14 +63,20 @@ class AppBarComponent(ft.AppBar):
         
         # Guardar persistencia
         storage = PersistenceService(self._app_page)
-        storage.set("theme_mode", "dark" if new_mode == ft.ThemeMode.DARK else "light")
+        await storage.set("theme_mode", "dark" if new_mode == ft.ThemeMode.DARK else "light")
         
         # Recargar para actualizar iconos (si es necesario) o simplemente cambiar icono
         if isinstance(e.control, ft.IconButton):
             e.control.icon = ft.Icons.DARK_MODE if new_mode == ft.ThemeMode.DARK else ft.Icons.LIGHT_MODE
             e.control.update()
 
-    def _change_language(self, lang: str):
+    def _create_change_language_handler(self, lang: str):
+        """Crea un manejador de eventos asíncrono para el cambio de idioma."""
+        async def handler(e):
+            await self._change_language(lang)
+        return handler
+
+    async def _change_language(self, lang: str):
         # Importación local para evitar circularidad
         from i18n.manager import i18n
         from services.persistence_service import PersistenceService
@@ -78,7 +84,7 @@ class AppBarComponent(ft.AppBar):
         # Cambiar y Guardar
         i18n.language = lang
         storage = PersistenceService(self._app_page)
-        storage.set("language", lang)
+        await storage.set("language", lang)
         
         # Propagar cambios
         if self._app_page.on_route_change:

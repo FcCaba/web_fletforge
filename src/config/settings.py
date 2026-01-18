@@ -56,6 +56,10 @@ class Settings:
         else:
             page.theme = get_app_theme()
         
+        # Aplicar fuente global al tema
+        if Settings.DEFAULT_FONT_FAMILY:
+            page.theme.font_family = Settings.DEFAULT_FONT_FAMILY
+        
         if Settings.PLATFORM == "mobile":
             page.window.width = Settings.MOBILE_WIDTH
             page.window.height = Settings.MOBILE_HEIGHT

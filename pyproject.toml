@@ -25,7 +25,5 @@ copyright = "Copyright (C) 2026 by Flet"
 [tool.flet.app]
 path = "src"
 
-icon = "assets/icon.png"
-
 [project.optional-dependencies]
 dev = ["pytest"]
