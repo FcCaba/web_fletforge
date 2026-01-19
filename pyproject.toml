@@ -1,7 +1,7 @@
 [project]
-name = "gestion-de-productos"
+name = "gestion de productos"
 version = "0.1.0"
-description = ""
+description = "Monolithic Async Application with FastAPI + Flet"
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [
@@ -9,21 +9,33 @@ authors = [
 ]
 dependencies = [
     "flet>=0.80.2",
+    "fastapi",
+    "uvicorn[standard]",
+    "sqlmodel",
+    "sqlalchemy[asyncio]",
+    "aiosqlite",
+    "httpx",
+    "python-dotenv",
+    "asyncpg",
 ]
 
 [dependency-groups]
 dev = [
-  "flet[all]>=0.80.2",
+    "flet[all]>=0.80.2",
 ]
 
+[project.optional-dependencies]
+dev = ["pytest"]
+
 [tool.flet]
-org = "com.mycompany"
-product = "gestion-de-productos"
-company = "Flet"
-copyright = "Copyright (C) 2026 by Flet"
+org = "com.example"
+product = "gestion de productos"
+company = "My Company"
+copyright = "Copyright (C) 2026 by My Company"
 
 [tool.flet.app]
 path = "src"
 
-[project.optional-dependencies]
-dev = ["pytest"]
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"

@@ -1,78 +1,73 @@
-import flet as ft
+"""
+App Settings
+============
+Configuración general de la aplicación.
+"""
 import os
-from .theme import ThemeColors, get_app_theme, get_alternative_theme
+import flet as ft
+from dotenv import load_dotenv, find_dotenv
 
-class Settings:
-    APP_TITLE = "FletForge App"
-    DEFAULT_LANGUAGE = "es"
-    THEME_MODE = "light" # "light", "dark", "system"
-    THEME_SELECTION = "default" # "default" o "alternative"
-    DEFAULT_FONT_FAMILY = "MainFont"
-    FONTS = {
-        "MainFont": "fonts/BebasNeue-Regular.ttf",
-    }
+# Cargar variables de entorno buscando el archivo .env
+env_file = find_dotenv()
+if env_file:
+    load_dotenv(env_file, override=True)
+    print(f"🔧 Configuración cargada desde: {env_file}")
+else:
+    print("⚠️  No se encontró archivo .env, usando valores por defecto.")
+
+
+class AppSettings:
+    """Configuración general de la aplicación."""
     
-    # Configuración de Plataforma: "desktop", "web", "mobile"
-    # Render inyecta la variable PLATFORM (si la configuras) o usa el default
-    PLATFORM = os.environ.get("PLATFORM", "web")
+    APP_NAME = "Gestion De Productos"
+    VERSION = "0.1.0"
     
-    # Dimensiones fijas para móvil
-    MOBILE_WIDTH = 390
-    MOBILE_HEIGHT = 844
-
-    # Configuración de Navegación
-    # Render inyecta la variable PORT automáticamente
-    WEB_PORT = int(os.environ.get("PORT", 8550))
-    ROUTE_URL_STRATEGY = "path"
-
-    # Mapeo de Colores para compatibilidad con Layouts
-    COLOR_PRIMARY = ThemeColors.PRIMARY
-    COLOR_ON_PRIMARY = ThemeColors.ON_PRIMARY
-    COLOR_SECONDARY = ThemeColors.SECONDARY
-    COLOR_SURFACE = ThemeColors.SURFACE
-    COLOR_BACKGROUND = ThemeColors.BACKGROUND
-    COLOR_ON_SURFACE = ThemeColors.ON_SURFACE
+    # Platform Configuration
+    # Options: "web", "desktop"
+    # Se normaliza a minúsculas y se eliminan espacios
+    PLATFORM = os.getenv("PLATFORM", "web").lower().strip()
     
-    # Nuevos Mapeos
-    COLOR_ERROR = ThemeColors.ERROR
-    COLOR_SUCCESS = ThemeColors.SUCCESS
-
-    # Opciones de Renderizado Web
-    WEB_RENDERER = "canvaskit"
-
-    @staticmethod
-    def configure_page(page: ft.Page):
-        """Configura los parámetros de la página según la plataforma."""
-        page.title = Settings.APP_TITLE
-        page.theme_mode = Settings.THEME_MODE
+    # Port configuration for deployment
+    # Se intenta leer PORT (estándar en Render/Heroku/Docker)
+    PORT = int(os.environ.get("PORT", os.getenv("PORT", "8550")))
+    # Usamos 127.0.0.1 por defecto para que el navegador abra correctamente en local.
+    # En producción (e.g. Render), la plataforma inyectará HOST=0.0.0.0
+    HOST = os.environ.get("HOST", os.getenv("HOST", "127.0.0.1"))
+    
+    # API Settings
+    API_TIMEOUT = 30  # seconds
+    
+    # UI Settings
+    DEFAULT_PADDING = 16
+    CARD_BORDER_RADIUS = 12
+    BUTTON_BORDER_RADIUS = 8
+    
+    @classmethod
+    def is_desktop(cls) -> bool:
+        """Verifica si la aplicación está en modo escritorio."""
+        return cls.PLATFORM == "desktop"
+    
+    @classmethod
+    def is_web(cls) -> bool:
+        """Verifica si la aplicación está en modo web."""
+        return cls.PLATFORM == "web"
         
-        if Settings.FONTS:
-            page.fonts = Settings.FONTS
+    @classmethod
+    def configure_page(cls, page: ft.Page):
+        """Configura los parámetros básicos de la página."""
+        page.title = cls.APP_NAME
+        page.padding = 0
         
-        # Selección de Tema (Independiente de la fuente)
-        # Puedes cambiar 'default' por 'alternative' para probar el otro tema
-        if Settings.THEME_SELECTION == "alternative":
-            page.theme = get_alternative_theme()
-        else:
-            page.theme = get_app_theme()
-        
-        # Aplicar fuente global al tema
-        if Settings.DEFAULT_FONT_FAMILY:
-            page.theme.font_family = Settings.DEFAULT_FONT_FAMILY
-        
-        if Settings.PLATFORM == "mobile":
-            page.window.width = Settings.MOBILE_WIDTH
-            page.window.height = Settings.MOBILE_HEIGHT
-            page.window.resizable = False
-            page.window.maximizable = False
-            page.window.always_on_top = True
-        elif Settings.PLATFORM == "desktop":
-            page.window.resizable = True
-            page.window.maximizable = True
-
-    @staticmethod
-    def get_app_view():
-        """Retorna el modo de vista correcto para ft.app()."""
-        if Settings.PLATFORM == "web":
-            return ft.AppView.WEB_BROWSER
-        return ft.AppView.FLET_APP
+        # Configuración de ventana para desktop
+        if not page.web:
+            page.window.width = 1000
+            page.window.height = 800
+            page.window.center()
+    
+    @classmethod
+    def print_config(cls):
+        """Imprime la configuración actual."""
+        print(f"🔧 App Configuration:")
+        print(f"   • Application: {cls.APP_NAME}")
+        print(f"   • Platform:    {cls.PLATFORM.upper()}")
+        print(f"   • Mode:        {'Desktop (Window + Server)' if cls.is_desktop() else 'Web (Server Only)'}")

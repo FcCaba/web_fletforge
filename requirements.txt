@@ -1,2 +1,23 @@
-flet>=0.80.2
-pytest
+# FletForge Generated Requirements
+# =================================
+
+# Flet UI Framework (versión específica requerida)
+flet==0.80.2
+
+# FastAPI Backend
+fastapi
+uvicorn[standard]
+
+# Database
+sqlmodel
+sqlalchemy[asyncio]
+aiosqlite  # Para SQLite asíncrono
+
+# HTTP Client
+httpx
+
+# Environment Variables
+python-dotenv
+
+# Async PostgreSQL (para Supabase)
+asyncpg

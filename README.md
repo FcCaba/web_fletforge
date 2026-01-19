@@ -1,61 +1,90 @@
-# GestionDeProductos app
+# Gestion De Productos
 
-## Run the app
+Proyecto generado con **FletForge** - Arquitectura Monolítica Asíncrona.
 
-### uv
+## Stack Tecnológico
 
-Run as a desktop app:
+- **Backend**: FastAPI + SQLModel
+- **Frontend**: Flet 0.80.2
+- **Base de Datos**: SQLite (local) / PostgreSQL (Supabase)
 
-```
-uv run flet run
-```
+## Ejecución
 
-Run as a web app:
-
-```
-uv run flet run --web
-```
-
-For more details on running the app, refer to the [Getting Started Guide](https://docs.flet.dev/).
-
-## Build the app
-
-### Android
-
-```
-flet build apk -v
+### Opción 1: Orquestador (Recomendado)
+Inicia tanto el Backend como el Frontend automáticamente.
+```bash
+python main.py
 ```
 
-For more details on building and signing `.apk` or `.aab`, refer to the [Android Packaging Guide](https://docs.flet.dev/publish/android/).
-
-### iOS
-
-```
-flet build ipa -v
+### Opción 2: Solo Frontend (Flet)
+Requiere que el Backend se esté ejecutando por separado.
+```bash
+flet run main.py
 ```
 
-For more details on building and signing `.ipa`, refer to the [iOS Packaging Guide](https://docs.flet.dev/publish/ios/).
+El backend estará disponible en: http://127.0.0.1:8000
+El frontend (modo web) estará disponible en: http://127.0.0.1:8550
 
-### macOS
+## Instalación
 
-```
-flet build macos -v
-```
+```bash
+# Crear entorno virtual
+python -m venv .venv
 
-For more details on building macOS package, refer to the [macOS Packaging Guide](https://docs.flet.dev/publish/macos/).
+# Activar entorno virtual
+# Windows:
+.venv\Scripts\activate
+# Linux/Mac:
+source .venv/bin/activate
 
-### Linux
-
-```
-flet build linux -v
-```
-
-For more details on building Linux package, refer to the [Linux Packaging Guide](https://docs.flet.dev/publish/linux/).
-
-### Windows
-
-```
-flet build windows -v
+# Instalar dependencias
+pip install -r requirements.txt
 ```
 
-For more details on building Windows package, refer to the [Windows Packaging Guide](https://docs.flet.dev/publish/windows/).
+## Ejecución
+    
+### Opción 1: Orquestador (Recomendado)
+Inicia tanto el Backend como el Frontend automáticamente.
+```bash
+python main.py
+```
+
+### Opción 2: Solo Frontend (Flet)
+Requiere que el Backend se esté ejecutando por separado.
+```bash
+flet run main.py
+```
+
+El backend estará disponible en: http://127.0.0.1:8000
+El frontend (modo web) estará disponible en: http://127.0.0.1:8550
+
+## Estructura del Proyecto
+
+```
+gestion de productos/
+├── backend/                 # FastAPI Backend
+│   ├── main.py             # Configuración FastAPI
+│   ├── database.py         # Conexión a BD
+│   ├── api_routes/         # Endpoints
+│   ├── models/             # Modelos SQLModel
+│   └── schemas/            # Schemas Pydantic
+├── src/                    # Flet Frontend
+│   ├── main.py             # Entrada Flet
+│   ├── core/               # Router
+│   ├── view/               # Vistas
+│   ├── controllers/        # Controladores
+│   ├── services/           # API Service
+│   └── config/             # Configuración
+├── main.py                 # Orquestador Backend + Frontend
+├── requirements.txt
+└── .env
+```
+
+## Crear Nueva Página
+
+```bash
+fletforge create page nombre_pagina
+```
+
+---
+Generado con ❤️ por FletForge v0.1.0

@@ -1,120 +1,70 @@
-import flet as ft
-from config.settings import Settings
-import warnings
+"""
+Flet Application Entry Point
+============================
+Punto de entrada principal de la aplicación Flet.
+"""
 import os
+import sys
+import threading
+import time
+import uvicorn
+import flet as ft
 
-# Silenciar warnings de Flet globalmente para un inicio limpio en Windows
-warnings.filterwarnings("ignore", category=DeprecationWarning)
-warnings.filterwarnings("ignore", category=RuntimeWarning)
+# Asegurar que el directorio raíz esté en el path para las importaciones
+# Esto permite que 'from backend...' funcione desde 'src/main.py'
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Evitar ruidos de asyncio en Windows al cerrar la app
-os.environ["PYTHONASYNCIODEBUG"] = "0"
+from src.core.router import Router
+from src.config.theme import apply_theme
+from src.config.settings import AppSettings
+
+
+def run_backend():
+    """Ejecuta el servidor FastAPI backend."""
+    try:
+        from backend.main import app as fastapi_app
+        print("🚀 [Backend] Iniciando en http://127.0.0.1:8000")
+        uvicorn.run(fastapi_app, host="127.0.0.1", port=8000, log_level="error")
+    except Exception as e:
+        print(f"❌ [Backend] Error: {e}")
+
 
 async def main(page: ft.Page):
-    # --- DIAGNOSTIC START ---
-    page.title = "Debug Mode"
-    log_col = ft.Column(scroll=True)
-    page.add(log_col)
+    """Función principal de la aplicación Flet."""
+    print(f"⚡ [Flet] Iniciando main. Modo: {'WEB' if page.web else 'DESKTOP'}")
     
-    def log(msg):
-        print(msg)
-        log_col.controls.append(ft.Text(f"LOG: {msg}", color="green", font_family="monospace"))
-        page.update()
+    # 1. Configuración Básica (desde Settings)
+    AppSettings.configure_page(page)
+    
+    # 2. Aplicar Tema
+    apply_theme(page)
+    
+    # 3. Inicializar Router y Eventos
+    router = Router(page)
+    router.setup_listeners()
+    
+    # 4. Iniciar Navegación
+    await router.start()
 
-    log(f"Iniciando... Plataforma: {page.platform}")
-    log(f"Ruta original: '{page.route}'")
 
-    try:
-        # 1. Configuración de página
-        log("1. Configurando Page...")
-        Settings.configure_page(page)
-        
-        # 2. Persistencia y Configuración Dinámica
-        log("2. Cargando Servicios...")
-        from services.persistence_service import PersistenceService
-        from i18n.manager import i18n
-        
-        storage = PersistenceService(page)
-        
-        # Cargar Tema
-        saved_theme = await storage.get("theme_mode", Settings.THEME_MODE)
-        page.theme_mode = ft.ThemeMode.DARK if saved_theme == "dark" else ft.ThemeMode.LIGHT
-        
-        # Cargar Idioma
-        saved_lang = await storage.get("language", Settings.DEFAULT_LANGUAGE)
-        i18n.language = saved_lang
-        
-        # 3. Selección de Router modular (Runtime Detection para APK/EXE)
-        log("3. Configurando Plataforma...")
-        if page.platform in [ft.PagePlatform.ANDROID, ft.PagePlatform.IOS]:
-            Settings.PLATFORM = "mobile"
-        elif page.platform in [ft.PagePlatform.WINDOWS, ft.PagePlatform.MACOS, ft.PagePlatform.LINUX]:
-            Settings.PLATFORM = "desktop"
-        
-        log(f"Plataforma final: {Settings.PLATFORM}")
-            
-        if Settings.PLATFORM == "mobile":
-            from core.router_mobile import MobileRouter as AppRouter
-        elif Settings.PLATFORM == "web":
-            from core.router_web import WebRouter as AppRouter
-        else:
-            from core.router_desktop import DesktopRouter as AppRouter
-
-        # 3. Vincular eventos (totalmente síncrono y profesional)
-        page.on_route_change = AppRouter.route_change
-        page.on_view_pop = AppRouter.on_view_pop
-        page.on_back_button = AppRouter.on_view_pop
-        
-        # 4. Carga inicial sincronizada usando la ruta actual
-        log("4. Cargando Rutas...")
-        
-        # Limpiamos el log para mostrar la app real... 
-        # COMENTADO PARA DEBUG: Si limpiamos y falla despues, no vemos el log.
-        # page.clean() 
-        
-        AppRouter.route_change(page)
-        log("✅ Router cargado.")
-        
-    except Exception as e:
-        import traceback
-        error_trace = traceback.format_exc()
-        log("❌ ERROR FATAL")
-        
-        # Asegurar que se vea el error
-        page.add(
-            ft.Container(
-                content=ft.Text(error_trace, color="red", size=14, font_family="monospace"),
-                bgcolor="#111111", padding=10
-            ) 
+# Orquestación de Backend y Lanzamiento
+def start_app():
+    # Iniciar Backend en hilo separado
+    threading.Thread(target=run_backend, daemon=True).start()
+    time.sleep(1)
+    
+    # Lanzar Flet
+    if AppSettings.is_web():
+        ft.run(
+            main,
+            host=AppSettings.HOST,
+            port=AppSettings.PORT,
+            view=ft.AppView.WEB_BROWSER,
+            web_renderer=ft.WebRenderer.CANVAS_KIT
         )
-        page.update()
+    else:
+        ft.app(target=main)
+
 
 if __name__ == "__main__":
-    # Configuración dinámica para evitar errores en Mobile (Android/iOS)
-    # El error 'TypeError: > not supported between NoneType and int' ocurre al pasar port=None
-    run_args = {
-        "main": main,
-        "assets_dir": "assets",
-        "view": Settings.get_app_view(),
-    }
-    
-    if Settings.PLATFORM == "web":
-        run_args["port"] = Settings.WEB_PORT
-        run_args["web_renderer"] = Settings.WEB_RENDERER
-        run_args["route_url_strategy"] = Settings.ROUTE_URL_STRATEGY
-        
-        # Configuración de Host Inteligente
-        # En Render/Docker necesitamos 0.0.0.0 para que sea accesible desde fuera.
-        # En Local (Windows) usamos 127.0.0.1 para que el navegador lo abra sin errores.
-        if os.environ.get("RENDER"):
-            run_args["host"] = "0.0.0.0"
-            print(f"🌍 Modo Cloud Detectado: Escuchando en 0.0.0.0:{Settings.WEB_PORT}")
-        else:
-            # En local dejamos que Flet decida (normalmente 127.0.0.1) o forzamos localhost
-            pass 
-
-    try:
-        ft.run(**run_args)
-    except (ConnectionResetError, KeyboardInterrupt):
-        # Silenciar errores de conexión al cerrar en Windows
-        pass
+    start_app()
